@@ -10,5 +10,5 @@ export function PortfolioWordmark() {
         className="hero-wordmark mix-blend-multiply select-none"
       />
     </h1>
-  )
+  );
 }

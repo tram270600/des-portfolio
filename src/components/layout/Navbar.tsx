@@ -12,11 +12,12 @@ import { navItems, site } from "@/data/site"
 import { cn } from "@/lib/utils"
 import { useUIStore } from "@/store/ui"
 
-export function Navbar() {
+export function Navbar({ home = true }: { home?: boolean }) {
   const activeSection = useUIStore((state) => state.activeSection)
   const mobileNavOpen = useUIStore((state) => state.mobileNavOpen)
   const setMobileNavOpen = useUIStore((state) => state.setMobileNavOpen)
-  const hidden = activeSection === "home"
+  const hidden = home && activeSection === "home"
+  const hrefFor = (hash: string) => (home ? hash : `/${hash}`)
 
   return (
     <header
@@ -26,7 +27,7 @@ export function Navbar() {
       )}
     >
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5 md:h-[72px] md:px-8">
-        <a href="#home" className="text-base font-semibold tracking-tight">
+        <a href={hrefFor("#home")} className="text-base font-semibold tracking-tight">
           {site.name}
         </a>
 
@@ -34,7 +35,7 @@ export function Navbar() {
           {navItems.map((item) => (
             <a
               key={item.id}
-              href={item.href}
+              href={hrefFor(item.href)}
               className={cn(
                 "text-sm font-medium text-foreground/70 transition-colors hover:text-foreground",
                 activeSection === item.id && "text-foreground",
@@ -44,13 +45,13 @@ export function Navbar() {
             </a>
           ))}
           <Button asChild>
-            <a href="#contact">Let's Chat</a>
+            <a href={hrefFor("#contact")}>Let's Chat</a>
           </Button>
         </nav>
 
         <div className="flex items-center gap-2 lg:hidden">
           <Button asChild size="sm" className="hidden sm:inline-flex">
-            <a href="#contact">Let's Chat</a>
+            <a href={hrefFor("#contact")}>Let's Chat</a>
           </Button>
           <Button
             variant="ghost"
@@ -73,7 +74,7 @@ export function Navbar() {
             {navItems.map((item) => (
               <a
                 key={item.id}
-                href={item.href}
+                href={hrefFor(item.href)}
                 onClick={() => setMobileNavOpen(false)}
                 className={cn(
                   "rounded-xl px-3 py-3 text-base font-medium hover:bg-muted",
@@ -84,7 +85,7 @@ export function Navbar() {
               </a>
             ))}
             <Button asChild className="mt-4">
-              <a href="#contact" onClick={() => setMobileNavOpen(false)}>
+              <a href={hrefFor("#contact")} onClick={() => setMobileNavOpen(false)}>
                 Let's Chat
               </a>
             </Button>

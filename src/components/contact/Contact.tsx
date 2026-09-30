@@ -1,15 +1,18 @@
 import { ArrowUpRight, Mail } from "lucide-react"
 
 import { Section } from "@/components/layout/Section"
+import { SectionTitle } from "@/components/layout/SectionTitle"
 import { Button } from "@/components/ui/button"
 import { site } from "@/data/site"
 
 export function Contact() {
   return (
     <Section id="contact">
+      <SectionTitle index="06" className="mb-8 md:mb-12">
+        Contact
+      </SectionTitle>
       <div className="paper-card relative overflow-hidden rounded-[32px] border border-border px-6 py-14 text-center md:px-12 md:py-20">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">06</p>
-        <h2 className="mt-3 font-display text-4xl font-semibold md:text-5xl">Let's chat</h2>
+        <p className="font-display text-3xl font-semibold md:text-4xl">Let's chat</p>
         <p className="mx-auto mt-5 max-w-xl text-lg text-foreground/80">
           Have a product idea or design challenge?
           <br />

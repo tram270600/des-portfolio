@@ -5,6 +5,7 @@ export const site = {
   email: "hello@tramnguyen.design",
   linkedin: "https://www.linkedin.com/in/tram-nguyen",
   location: "Vietnam",
+  cv: "https://drive.google.com/file/d/1JCSpRtZO0J8wtVEPzmM3eFvC17fyyPH-/view?usp=sharing",
 } as const
 
 export const navItems = [

@@ -1,6 +1,7 @@
 import { About } from "@/components/about/About"
 import { Contact } from "@/components/contact/Contact"
 import { Experience } from "@/components/experience/Experience"
+import { FindBar } from "@/components/layout/FindBar"
 import { Hero } from "@/components/hero/Hero"
 import { Footer } from "@/components/layout/Footer"
 import { Navbar } from "@/components/layout/Navbar"
@@ -30,6 +31,7 @@ export function Home() {
         <Contact />
       </main>
       <Footer />
+      <FindBar />
     </TooltipProvider>
   )
 }
