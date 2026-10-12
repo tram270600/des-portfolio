@@ -1,11 +1,19 @@
 import { CaseStudyPage } from "@/components/case/CaseStudyPage"
 import { findCaseStudy } from "@/data/cases"
+import { AllProjects } from "@/pages/AllProjects"
 import { Home } from "@/pages/Home"
+import { Playground } from "@/pages/Playground"
 
 export default function App() {
-  const caseId = new URLSearchParams(window.location.search).get("case")
-  const study = window.location.pathname === "/experience" ? findCaseStudy(caseId) : null
-  if (study) return <CaseStudyPage study={study} />
+  const path = window.location.pathname.replace(/\/$/, "") || "/"
+  if (path === "/playground") return <Playground />
+
+  if (path === "/experience") {
+    const caseId = new URLSearchParams(window.location.search).get("case")
+    const study = findCaseStudy(caseId)
+    if (study) return <CaseStudyPage study={study} />
+    return <AllProjects />
+  }
 
   return <Home />
 }

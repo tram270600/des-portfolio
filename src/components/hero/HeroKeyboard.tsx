@@ -18,7 +18,7 @@ export function HeroKeyboard() {
   return (
     <div
       {...{ [SEARCH_IGNORE_ATTR]: "" }}
-      className="relative mx-auto mt-6 hidden w-full min-w-0 max-w-[540px] md:block"
+      className="relative mx-auto mt-6 w-full min-w-0 max-w-[540px]"
       aria-hidden
     >
       <div

@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { ArrowUpRight, FileText, Search } from "lucide-react"
 
+import { HeroFloat } from "@/components/hero/HeroFloat"
 import { keyLabelFor } from "@/components/hero/keyboardKeys"
+import { useScrambleText } from "@/components/hero/useScrambleText"
 import { site } from "@/data/site"
 import { useDebouncedEffect } from "@/hooks/useDebouncedEffect"
+import { afterAboutLayout } from "@/lib/aboutRunway"
 import { SEARCH_IGNORE_ATTR, highlightQuery, revealElement, searchPage, type SearchResult } from "@/lib/pageSearch"
 import { cn } from "@/lib/utils"
 import { useSearchStore } from "@/store/search"
@@ -17,6 +20,7 @@ export function SearchCta() {
   const openFind = useSearchStore((state) => state.openFind)
 
   const inputRef = useRef<HTMLInputElement>(null)
+  const { frame: scrambled, stop: stopIntro } = useScrambleText(site.name)
   const listboxId = useId()
   const [focused, setFocused] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
@@ -47,12 +51,28 @@ export function SearchCta() {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (!(event.metaKey || event.ctrlKey) || event.key.toLowerCase() !== "p") return
+      if (event.repeat || event.shiftKey) return
+      const key = event.key.toLowerCase()
+      if ((event.metaKey || event.ctrlKey) && !event.altKey && key === "p") {
+        event.preventDefault()
+        focusSearch()
+        return
+      }
+      const worksKey = event.code === "KeyE" || key === "e"
+      if (!((event.metaKey || event.ctrlKey) && !event.altKey && worksKey)) return
+      const works = document.getElementById("projects")
+      if (!works) return
       event.preventDefault()
-      focusSearch()
+      afterAboutLayout(() => {
+        works.scrollIntoView({
+          block: "start",
+          behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        })
+        history.pushState(null, "", "#projects")
+      })
     }
-    window.addEventListener("keydown", onKeyDown)
-    return () => window.removeEventListener("keydown", onKeyDown)
+    window.addEventListener("keydown", onKeyDown, true)
+    return () => window.removeEventListener("keydown", onKeyDown, true)
   }, [focusSearch])
 
   const { results, total } = search
@@ -73,7 +93,7 @@ export function SearchCta() {
 
   return (
     <form
-      className="relative mx-auto box-border w-full min-w-0 max-w-full md:max-w-[560px]"
+      className="pointer-events-auto relative mx-auto box-border w-full min-w-0 max-w-full md:max-w-[560px]"
       onSubmit={(event) => {
         event.preventDefault()
         const active = results[activeIndex]
@@ -102,6 +122,11 @@ export function SearchCta() {
               <span aria-hidden className="invisible col-start-1 row-start-1 truncate whitespace-pre">
                 {query || "Search the portfolio"}
               </span>
+              {scrambled !== null ? (
+                <span aria-hidden className="pointer-events-none col-start-1 row-start-1 truncate whitespace-pre text-foreground">
+                  {scrambled}
+                </span>
+              ) : null}
               <input
                 ref={inputRef}
                 id="hero-search"
@@ -117,10 +142,14 @@ export function SearchCta() {
                 value={query}
                 size={1}
                 onChange={(event) => {
+                  stopIntro()
                   setFocused(true)
                   setQuery(event.target.value)
                 }}
-                onFocus={() => setFocused(true)}
+                onFocus={() => {
+                  stopIntro()
+                  setFocused(true)
+                }}
                 onBlur={() => {
                   setFocused(false)
                   setPressedKey(null)
@@ -141,7 +170,10 @@ export function SearchCta() {
                   }
                 }}
                 onKeyUp={() => setPressedKey(null)}
-                className="col-start-1 row-start-1 w-full min-w-[1ch] bg-transparent text-foreground caret-foreground placeholder:text-muted-foreground focus-visible:outline-none"
+                className={cn(
+                  "col-start-1 row-start-1 w-full min-w-[1ch] bg-transparent caret-foreground placeholder:text-muted-foreground focus-visible:outline-none",
+                  scrambled !== null ? "text-transparent" : "text-foreground",
+                )}
               />
             </span>
           </label>
@@ -211,14 +243,25 @@ export function SearchCta() {
       ) : null}
 
       <div className="pointer-events-none absolute -right-3 top-[58%] hidden lg:block lg:-right-24">
-        <img
-          src="/images/hero-cursor.png"
-          alt=""
-          aria-hidden
-          width={25}
-          height={27}
-          className="absolute top-1 -left-1.5 z-10 [filter:drop-shadow(0_0_1px_#fff)_drop-shadow(0_0_1px_#fff)_drop-shadow(0_0_0.5px_#fff)]"
-        />
+        <HeroFloat
+          className="absolute top-1 -left-1.5 z-10 h-[27px] w-[25px]"
+          duration="6.4s"
+          delay="-2s"
+          reveal={false}
+          x="4px"
+          y="-6px"
+          rotate="2deg"
+          swing="14deg"
+        >
+          <img
+            src="/images/hero-cursor.png"
+            alt=""
+            aria-hidden
+            width={25}
+            height={27}
+            className="size-full [filter:drop-shadow(0_0_1px_#fff)_drop-shadow(0_0_1px_#fff)_drop-shadow(0_0_0.5px_#fff)]"
+          />
+        </HeroFloat>
         <div className="pointer-events-auto flex items-center gap-2 rounded-r-full rounded-bl-full bg-white/80 py-2 pr-2.5 pl-7 shadow-[0_4px_20px_rgba(0,105,215,0.3)] backdrop-blur-sm">
           <span className="block size-[54px] shrink-0 overflow-hidden rounded-full border-[3px] border-white">
             <img

@@ -29,7 +29,7 @@
 }
 
 @theme inline {
-  --font-sans: "Lexend", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-neue: "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-script: "Figma Hand", "Caveat", cursive;
   --font-pinyon: "Pinyon Script", cursive;
@@ -95,25 +95,67 @@
 
   html {
     scroll-behavior: smooth;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
   }
 
 #root {
-    overflow-x: hidden;
+    overflow-x: clip;
     max-width: 100%;
   }
 
   .hero-wordmark {
-    height: auto;
-    display: block;
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    width: min(42.75rem, 100%);
     max-width: 100%;
-    margin: auto;
+    margin-inline: auto;
+    overflow: visible;
+    padding-block: 0.28em 0.06em;
+    font-size: clamp(3.4rem, 12.4vw, 7.5rem);
+    line-height: 0.78;
+  }
+
+  .hero-wordmark-letter {
+    display: inline-block;
+    font-weight: 400;
+    line-height: 0.78;
+    will-change: transform, opacity, color;
+  }
+
+  .hero-wordmark-letter[data-letter="P"] {
+    font-size: 1.02em;
+  }
+
+  .hero-wordmark-letter[data-letter="O"] {
+    font-size: 1.04em;
+  }
+
+  .hero-wordmark-letter[data-letter="R"] {
+    font-size: 0.96em;
+  }
+
+  .hero-wordmark-letter[data-letter="T"] {
+    z-index: 1;
+    font-size: 1.12em;
+  }
+
+  .hero-wordmark-letter[data-letter="F"] {
+    font-size: 0.94em;
+  }
+
+  .hero-wordmark-letter[data-letter="L"] {
+    font-size: 1.08em;
+  }
+
+  .hero-wordmark-letter[data-letter="I"] {
+    font-size: 0.92em;
   }
 
   ::selection {
@@ -156,6 +198,164 @@
   }
 }
 
+.contact-rise {
+  transform: translateY(var(--rise, 115%));
+  transition: transform var(--rise-duration, 850ms) cubic-bezier(0.16, 1, 0.3, 1) var(--rise-delay, 0ms);
+}
+
+.contact-reveal[data-revealed="true"] .contact-rise {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-rise {
+    transform: none;
+    transition: none;
+  }
+}
+
+@keyframes phone-drop {
+  0% {
+    transform: translateY(-115%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  70% {
+    transform: translateY(14px);
+    opacity: 1;
+  }
+  84% {
+    transform: translateY(-6px);
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes phone-settle {
+  0% {
+    transform: rotate(0deg);
+  }
+  58% {
+    transform: rotate(7deg);
+  }
+  76% {
+    transform: rotate(-4deg);
+  }
+  90% {
+    transform: rotate(2deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes phone-hover-swing {
+  0%,
+  100% {
+    transform: rotate(-4.5deg);
+  }
+  50% {
+    transform: rotate(4.5deg);
+  }
+}
+
+.phone-drop {
+  transform: translateY(-115%);
+  opacity: 0;
+}
+
+.phone-drop.is-dropping {
+  animation: phone-drop 1.05s cubic-bezier(0.2, 0.8, 0.28, 1) forwards;
+}
+
+.phone-drop.is-resting {
+  transform: none;
+  opacity: 1;
+}
+
+.phone-swing {
+  display: block;
+  transform-origin: 58% 0%;
+}
+
+.phone-drop.is-dropping .phone-swing {
+  animation: phone-settle 1.2s cubic-bezier(0.22, 0.7, 0.3, 1) both;
+}
+
+.phone-drop.is-resting:hover .phone-swing,
+.phone-drop.is-resting:focus-visible .phone-swing {
+  animation: phone-hover-swing 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .phone-drop,
+  .phone-drop.is-dropping,
+  .phone-drop.is-resting,
+  .phone-swing,
+  .phone-drop.is-dropping .phone-swing,
+  .phone-drop.is-resting:hover .phone-swing {
+    transform: none;
+    opacity: 1;
+    animation: none;
+  }
+}
+
+@keyframes hero-object-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  30% {
+    transform: translate3d(var(--drift-x, 8px), calc(var(--drift-y, -12px) * 0.4), 0)
+      rotate(var(--drift-r, 1.2deg));
+  }
+  58% {
+    transform: translate3d(calc(var(--drift-x, 8px) * -0.7), var(--drift-y, -12px), 0)
+      rotate(calc(var(--drift-r, 1.2deg) * -1));
+  }
+  82% {
+    transform: translate3d(calc(var(--drift-x, 8px) * -0.2), calc(var(--drift-y, -12px) * 0.3), 0)
+      rotate(calc(var(--drift-r, 1.2deg) * 0.45));
+  }
+}
+
+@keyframes hero-object-swing {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(var(--swing, 8deg));
+  }
+  75% {
+    transform: rotate(calc(var(--swing, 8deg) * -1));
+  }
+}
+
+.hero-object {
+  animation: hero-object-float var(--float-duration, 8.5s) ease-in-out infinite;
+  animation-delay: var(--float-delay, 0s);
+}
+
+.hero-object-swing {
+  transform-origin: 50% 38%;
+}
+
+.hero-object:hover .hero-object-swing {
+  animation: hero-object-swing 1.05s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-object,
+  .hero-object:hover .hero-object-swing {
+    animation: none;
+  }
+}
+
 @keyframes experience-reveal {
   from {
     opacity: 0;
@@ -184,4 +384,13 @@
   border-width: 2px;
   border-style: solid;
   border-radius: 18px 22px 16px 20px / 20px 16px 22px 18px;
+}
+
+.motion-curtains {
+  pointer-events: auto;
+  user-select: none;
+}
+
+.motion-curtain {
+  background: var(--curtain, #0a0a0a);
 }

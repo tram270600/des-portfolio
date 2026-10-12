@@ -1,6 +1,9 @@
+import { afterAboutLayout } from "@/lib/aboutRunway"
+import { projectScrollTop } from "@/lib/worksScrollTarget"
+
 export const SEARCH_IGNORE_ATTR = "data-search-ignore"
 
-const SKIPPED_SECTIONS = new Set(["home", "contents"])
+const SKIPPED_SECTIONS = new Set(["home"])
 
 type Entry = {
   label: string
@@ -202,21 +205,41 @@ export function highlightQuery(root: HTMLElement, rawQuery: string) {
 const prefersReducedMotion = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
 
 export function revealElement(element: HTMLElement) {
-  element.scrollIntoView({ block: element.tagName === "SECTION" ? "start" : "center" })
-  if (prefersReducedMotion()) return
-  element.animate(
-    [
-      { boxShadow: "0 0 0 4px var(--yellow)" },
-      { boxShadow: "0 0 0 4px var(--yellow)", offset: 0.6 },
-      { boxShadow: "0 0 0 0 transparent" },
-    ],
-    { duration: 1600, easing: "ease-out" },
-  )
+  afterAboutLayout(() => {
+    const projectTop = projectScrollTop(element)
+    if (projectTop != null) {
+      window.scrollTo({ top: projectTop, behavior: prefersReducedMotion() ? "auto" : "smooth" })
+      return
+    }
+    element.scrollIntoView({
+      block: element.tagName === "SECTION" ? "start" : "center",
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    })
+    if (prefersReducedMotion()) return
+    element.animate(
+      [
+        { boxShadow: "0 0 0 4px var(--yellow)" },
+        { boxShadow: "0 0 0 4px var(--yellow)", offset: 0.6 },
+        { boxShadow: "0 0 0 0 transparent" },
+      ],
+      { duration: 1600, easing: "ease-out" },
+    )
+  })
 }
 
 export function revealRange(range: Range) {
-  const rect = range.getBoundingClientRect()
-  window.scrollTo({ top: window.scrollY + rect.top - window.innerHeight / 2 })
+  afterAboutLayout(() => {
+    const projectTop = projectScrollTop(range.startContainer)
+    if (projectTop != null) {
+      window.scrollTo({ top: projectTop, behavior: prefersReducedMotion() ? "auto" : "smooth" })
+      return
+    }
+    const rect = range.getBoundingClientRect()
+    window.scrollTo({
+      top: window.scrollY + rect.top - window.innerHeight / 2,
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+    })
+  })
 }
 
 export function paintMatches(ranges: Range[], current: number) {

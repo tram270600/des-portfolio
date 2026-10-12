@@ -1,123 +1,42 @@
-export type SkillColumn = {
-  title: string
-  items: string[]
-}
-
-export type SkillSheet = {
+export type Certificate = {
   id: string
-  label: string
-  comingSoon?: boolean
-  columns: SkillColumn[]
+  title: string
+  description: string
+  href: string
+  frame: string
+  artwork: string
+  accent: string
 }
 
-export const skillSheets: SkillSheet[] = [
+export const certificates: Certificate[] = [
   {
-    id: "ui-ux",
-    label: "UI/UX Design",
-    columns: [
-      {
-        title: "UI",
-        items: [
-          "Prototypes",
-          "Design System",
-          "Mobile View",
-          "Animation",
-          "Features Screen",
-          "Mockups",
-          "Desktop View",
-          "Site map",
-          "Accessibility Version",
-          "Moodboard",
-        ],
-      },
-      {
-        title: "UX",
-        items: [
-          "Accessibility & Revise",
-          "Sketches",
-          "Wireframes",
-          "Problem Statements",
-          "User Flow",
-          "User Journey Maps",
-          "Empathy Maps",
-        ],
-      },
-      {
-        title: "Tools",
-        items: ["Figma", "Adobe XD", "Sketch", "Miro", "FigJam"],
-      },
-    ],
+    id: "accessibility",
+    title: "Accessibility Foundations",
+    description: "The bearer of this certificate has completed the Accessibility Foundations course",
+    href: "https://app.uxcel.com/certificates/NL49STWIL4TH",
+    frame: "/images/certificate/frame1.png",
+    artwork: "/images/certificate/Accessibility.png",
+    accent: "#00b078",
   },
   {
-    id: "research",
-    label: "User Research & Collaboration",
-    columns: [
-      {
-        title: "Analysis",
-        items: ["User Personas", "User Research", "Competitive Analysis"],
-      },
-      {
-        title: "Tools",
-        items: ["Notion", "Confluence", "Google Forms", "Google Analytics", "Hotjar", "Metabase"],
-      },
-    ],
+    id: "designathon",
+    title: "Designathon Competition 2024",
+    description:
+      "In recognition of outstanding commitment and creativity during the Lollypop Designathon 2024",
+    href: "https://lollypop.design/designathon-2024/",
+    frame: "/images/certificate/frame2.png",
+    artwork: "/images/certificate/Designathon.png",
+    accent: "#f86048",
   },
   {
-    id: "visual",
-    label: "Visual & Graphic Design",
-    columns: [
-      {
-        title: "Tools",
-        items: ["Adobe Photoshop", "Adobe Lightroom", "Canva", "Wacom Tablet"],
-      },
-    ],
-  },
-  {
-    id: "frameworks",
-    label: "UI Frameworks & Libraries",
-    columns: [
-      {
-        title: "Libraries",
-        items: ["Material UI", "Ant Design", "Tailwind CSS", "Bootstrap", "Storybook", "Lottie"],
-      },
-    ],
-  },
-  {
-    id: "frontend",
-    label: "Frontend Development",
-    columns: [
-      {
-        title: "Stack",
-        items: ["HTML5/CSS/SCSS", "JavaScript/TypeScript", "ReactJS"],
-      },
-    ],
-  },
-  {
-    id: "ai",
-    label: "AI Workflow",
-    comingSoon: true,
-    columns: [],
+    id: "user-psychology",
+    title: "User Psychology",
+    description: "The bearer of this certificate has completed the User Psychology course",
+    href: "https://app.uxcel.com/certificates/XOUJO7P2S2QC",
+    frame: "/images/certificate/frame3.png",
+    artwork: "/images/certificate/UserPsychology.png",
+    accent: "#0068d0",
   },
 ]
 
-export type SkillRow = {
-  group: string
-  focus: string
-  skill: string
-}
-
-export const allSkillRows: SkillRow[] = skillSheets.flatMap((sheet) =>
-  sheet.columns.flatMap((column) =>
-    column.items.map((skill) => ({
-      group: sheet.label,
-      focus: column.title,
-      skill,
-    })),
-  ),
-)
-
-export const totalSkillRows = allSkillRows.length
-
-export function sheetLineCount(columns: SkillColumn[]) {
-  return columns.reduce((sum, column) => sum + column.items.length, 0)
-}
+export const restingCertificateId = certificates[1].id

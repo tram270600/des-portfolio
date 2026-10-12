@@ -55,6 +55,13 @@ export type CaseSection =
       kind: "groups"
       groups: CaseGroup[]
     }
+  | {
+      id: string
+      label: string
+      kind: "figma"
+      isFullScreen: boolean
+      embedUrl: string
+    }
 
 export type CaseStudy = {
   id: string

@@ -3,18 +3,19 @@ import { Contact } from "@/components/contact/Contact"
 import { Experience } from "@/components/experience/Experience"
 import { FindBar } from "@/components/layout/FindBar"
 import { Hero } from "@/components/hero/Hero"
-import { Footer } from "@/components/layout/Footer"
 import { Navbar } from "@/components/layout/Navbar"
 import { SkipLink } from "@/components/layout/SkipLink"
 import { Projects } from "@/components/projects/Projects"
-import { Services } from "@/components/services/Services"
+// import { Services } from "@/components/services/Services"
 import { Skills } from "@/components/skills/Skills"
-import { TableOfContents } from "@/components/toc/TableOfContents"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { useScrollSpy } from "@/hooks/useScrollSpy"
+import { useHomeScrollMemory } from "@/lib/homeScroll"
+import { Playground } from "@/components/playground/Playground"
 
 export function Home() {
   useScrollSpy()
+  useHomeScrollMemory()
 
   return (
     <TooltipProvider>
@@ -23,14 +24,13 @@ export function Home() {
       <main id="main">
         <Hero />
         <About />
-        <TableOfContents />
         <Experience />
         <Projects />
         <Skills />
-        <Services />
+        {/* <Services /> */}
+        <Playground />
         <Contact />
       </main>
-      <Footer />
       <FindBar />
     </TooltipProvider>
   )

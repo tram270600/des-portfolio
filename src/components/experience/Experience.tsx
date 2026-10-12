@@ -1,15 +1,45 @@
 import { Download } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
+import { ExperienceField } from "@/components/experience/ExperienceField"
 import { Section } from "@/components/layout/Section"
 import { SectionTitle } from "@/components/layout/SectionTitle"
 import { experiences } from "@/data/experience"
 import { site } from "@/data/site"
 import { cn } from "@/lib/utils"
 
+function DetailSwitch({ on }: { on: boolean }) {
+  return (
+    <span className="flex flex-col items-center">
+      <span
+        className={cn(
+          "mt-3 translate-y-1 text-[12px] leading-none",
+          on ? "text-green" : "text-mono-400",
+        )}
+      >
+        ON
+      </span>
+      <img
+        src="/images/experience/switch-body.png"
+        alt=""
+        className="mt-1.5 h-12 w-auto origin-center transition-none"
+        style={{ transform: on ? "scaleX(-1)" : "rotate(180deg)" }}
+      />
+      <span
+        className={cn(
+          "mt-3 translate-y-1 text-[12px] leading-none",
+          on ? "text-mono-400" : "text-mono-700",
+        )}
+      >
+        OFF
+      </span>
+    </span>
+  )
+}
+
 export function Experience() {
-  const [detail, setDetail] = useState(true)
-  const [activeId, setActiveId] = useState("saturnai")
+  const [detail, setDetail] = useState(false)
+  const [activeId, setActiveId] = useState("smartlink")
   const [shown, setShown] = useState(true)
   const swapTimer = useRef<number>(0)
   const active = experiences.find((item) => item.id === activeId) ?? experiences[0]
@@ -33,8 +63,9 @@ export function Experience() {
   }
 
   return (
-    <Section id="experience" contained={false} className="py-16 md:py-20">
-      <div className="mx-auto w-full max-w-6xl px-5 md:px-8">
+    <Section id="experience" contained={false} className="overflow-hidden py-16 md:py-20">
+      <ExperienceField />
+      <div className="relative z-[1] mx-auto w-full max-w-6xl px-5 md:px-8">
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
           <SectionTitle index="02">Experience</SectionTitle>
           <div className="ml-auto flex items-center gap-3 text-sm text-p-grey-60">
@@ -56,25 +87,16 @@ export function Experience() {
               aria-checked={detail}
               aria-labelledby="experience-detail-label"
               onClick={() => setDetail((value) => !value)}
-              className={cn(
-                "relative h-5 w-9 shrink-0 rounded-full transition-colors",
-                detail ? "bg-green" : "bg-[#d5d5d5]",
-              )}
+              className="shrink-0 cursor-pointer"
             >
-              <span
-                aria-hidden
-                className={cn(
-                  "absolute top-0.5 left-0.5 size-4 rounded-full bg-white shadow-sm transition-transform",
-                  detail && "translate-x-4",
-                )}
-              />
+              <DetailSwitch on={detail} />
             </button>
           </div>
         </div>
 
         {detail ? (
           <div className="mt-10 grid items-start gap-8 lg:mt-14 lg:grid-cols-[minmax(0,0.72fr)_minmax(0,1fr)] lg:gap-12">
-            <div role="tablist" aria-label="Companies" className="flex flex-col">
+            <div role="tablist" aria-label="Companies" className="flex flex-row overflow-x-auto md:flex-col">
               {experiences.map((item) => {
                 const selected = item.id === active.id
                 return (
@@ -87,7 +109,7 @@ export function Experience() {
                     aria-controls="experience-panel"
                     onClick={() => selectCompany(item.id)}
                     className={cn(
-                      "border-l-2 px-6 py-4 text-left transition-colors duration-300 md:px-8",
+                      "order-t-1 md:border-t-0 md:border-l-2 px-6 py-4 text-left transition-colors duration-300 md:px-8",
                       selected
                         ? "border-primary"
                         : "border-transparent text-p-grey-60 hover:text-primary",
@@ -112,15 +134,16 @@ export function Experience() {
                         selected ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
                       )}
                     >
-                      <p className="mt-1 max-w-sm overflow-hidden text-base leading-6 text-p-grey-50">
+                      <p className="md:block hidden mt-1 max-w-sm overflow-hidden text-base leading-6 text-p-grey-50">
                         {item.subtitle}
                       </p>
                     </div>
                   </button>
-                )
-              })}
+              )})}
             </div>
-
+            <p className="block md:hidden mt-1 max-w-sm overflow-hidden text-base leading-6 text-p-grey-50">
+              {active.subtitle}
+            </p>
             <div
               role="tabpanel"
               id="experience-panel"

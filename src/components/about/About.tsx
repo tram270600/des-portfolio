@@ -6,6 +6,7 @@ import { ScrollWordReveal } from "@/components/about/ScrollWordReveal"
 import { TypewriterGroup, TypewriterText } from "@/components/about/Typewriter"
 import { Section } from "@/components/layout/Section"
 import { SectionTitle } from "@/components/layout/SectionTitle"
+import { registerAboutRunway } from "@/lib/aboutRunway"
 
 const greeting = ["Hello,", "It’s a pleasure to meet you! I’m Tram"] as const
 
@@ -49,6 +50,7 @@ function PinnedStory() {
   const progress = useMotionValue(0)
   const travelRef = useRef(0)
   const lockedHeight = useRef<number | null>(null)
+  const holdRunway = useRef(false)
   const [pin, setPin] = useState<"flow" | "fixed" | "dock">("flow")
   const [runwayHeight, setRunwayHeight] = useState<number | null>(null)
   const [fixedBox, setFixedBox] = useState({ top: 72, left: 0, width: 0 })
@@ -94,6 +96,19 @@ function PinnedStory() {
     return () => observer.disconnect()
   }, [endW, settled, sideTop, stageW, startW])
 
+  useLayoutEffect(() => {
+    return registerAboutRunway(() => {
+      if (settled) return
+      const frame = frameRef.current
+      if (!frame) return
+      const travel = Math.round(window.innerHeight * 0.7)
+      travelRef.current = travel
+      lockedHeight.current = frame.offsetHeight + travel
+      holdRunway.current = true
+      setRunwayHeight(lockedHeight.current)
+    })
+  }, [settled])
+
   useEffect(() => {
     if (settled) return
     const update = () => {
@@ -105,12 +120,15 @@ function PinnedStory() {
       travelRef.current = travel
       const rect = runway.getBoundingClientRect()
       if (rect.top > nav) {
-        lockedHeight.current = null
-        setRunwayHeight(null)
+        if (!holdRunway.current) {
+          lockedHeight.current = null
+          setRunwayHeight(null)
+        }
         setPin("flow")
         progress.set(0)
         return
       }
+      holdRunway.current = false
       if (lockedHeight.current == null) {
         lockedHeight.current = frame.offsetHeight + travel
         setRunwayHeight(lockedHeight.current)
@@ -130,11 +148,18 @@ function PinnedStory() {
       progress.set(scrolled / travel)
     }
 
+    const releaseHold = () => {
+      holdRunway.current = false
+      update()
+    }
+
     update()
     window.addEventListener("scroll", update, { passive: true })
+    window.addEventListener("scrollend", releaseHold)
     window.addEventListener("resize", update)
     return () => {
       window.removeEventListener("scroll", update)
+      window.removeEventListener("scrollend", releaseHold)
       window.removeEventListener("resize", update)
     }
   }, [progress, settled])

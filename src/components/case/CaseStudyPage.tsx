@@ -1,45 +1,85 @@
 import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type MouseEvent } from "react"
+import { flushSync } from "react-dom"
 
+import { CaseStudyTitle } from "@/components/case/CaseStudyTitle"
+import { TitleReveal } from "@/components/case/TitleReveal"
 import { SkipLink } from "@/components/layout/SkipLink"
+import { findCaseStudy } from "@/data/cases"
 import type { CaseFigure, CaseMedia, CaseSection, CaseStudy } from "@/data/cases/types"
 import { projects } from "@/data/projects"
+import { blinds, curtains } from "@/lib/curtains"
+import { requestHomeScrollRestore } from "@/lib/homeScroll"
 import { cn } from "@/lib/utils"
 
+const PLAIN_TITLES = new Set([
+  "my role",
+  "constraints",
+  "challenge",
+  "motivation",
+  "context",
+  "tools",
+  "target users",
+  "platform",
+  "description",
+])
+
+function TitleText({ text }: { text: string }) {
+  if (PLAIN_TITLES.has(text.toLowerCase())) return text
+  return <TitleReveal text={text} />
+}
+
 function Label({ children }: { children: string }) {
-  return <p className="text-sm font-medium tracking-wide text-mono-400 uppercase">{children}</p>
+  return (
+    <p className="text-sm font-medium tracking-wide text-mono-400 uppercase">
+      <TitleText text={children} />
+    </p>
+  )
 }
 
 function Body({ children, className }: { children: string; className?: string }) {
   return <p className={cn("text-base leading-8 text-mono-900", className)}>{children}</p>
 }
 
-function SectionHeading({ id, children, large = false }: { id: string; children: string; large?: boolean }) {
+function SectionHeading({ id, children }: { id: string; children: string }) {
   return (
-    <h2
-      id={id}
-      className={cn(
-        "scroll-mt-28 font-medium tracking-tight text-mono-950 uppercase",
-        large ? "text-2xl md:text-3xl" : "text-xl md:text-2xl",
-      )}
-    >
-      {children}
+    <h2 id={id} className="scroll-mt-28 text-xl font-medium tracking-tight text-mono-950 uppercase md:text-2xl">
+      <TitleText text={children} />
     </h2>
   )
 }
 
 function GroupTitle({ children }: { children: string }) {
-  return <h3 className="text-lg font-medium tracking-wide text-mono-950 uppercase">{children}</h3>
+  return (
+    <h3 className="text-lg font-medium tracking-wide text-mono-950 uppercase">
+      <TitleText text={children} />
+    </h3>
+  )
+}
+
+function caseStudyFromHref(href: string) {
+  let url: URL
+  try {
+    url = new URL(href, window.location.href)
+  } catch {
+    return null
+  }
+  if (url.origin !== window.location.origin) return null
+  const path = url.pathname.replace(/\/$/, "") || "/"
+  if (path !== "/experience") return null
+  return findCaseStudy(url.searchParams.get("case"))
 }
 
 function StepLink({
   project,
   label,
   direction,
+  onNavigate,
 }: {
   project: (typeof projects)[number] | null
   label: string
   direction: "previous" | "next"
+  onNavigate: (event: MouseEvent<HTMLAnchorElement>, href: string) => void
 }) {
   const className =
     "inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-mono-200 text-mono-950 transition-colors hover:border-mono-700 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-mono-200"
@@ -53,7 +93,13 @@ function StepLink({
   }
   const external = project.href.startsWith("http")
   return (
-    <a href={project.href} aria-label={label} className={className} {...(external ? { target: "_blank", rel: "noreferrer" } : {})}>
+    <a
+      href={project.href}
+      aria-label={label}
+      className={className}
+      onClick={(event) => onNavigate(event, project.href)}
+      {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
+    >
       {icon}
     </a>
   )
@@ -130,16 +176,22 @@ function OverviewSection({ section, title }: { section: Extract<CaseSection, { k
   return (
     <section aria-labelledby={section.id} className="space-y-8">
       <div>
-        <SectionHeading id={section.id} large>
-          {title}
-        </SectionHeading>
+        <h2
+          id={section.id}
+          aria-label={title}
+          className="scroll-mt-28 text-2xl font-medium tracking-tight text-mono-950 uppercase md:text-3xl"
+        >
+          <CaseStudyTitle text={title} />
+        </h2>
         <p className="mt-3 text-lg font-medium text-mono-600">{section.eyebrow}</p>
       </div>
       <div className="grid gap-10 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.1fr)] lg:gap-16">
         <dl className="space-y-6">
           {section.facts.map((fact) => (
             <div key={fact.label}>
-              <dt className="text-sm font-medium tracking-wide text-mono-400 uppercase">{fact.label}</dt>
+              <dt className="text-sm font-medium tracking-wide text-mono-400 uppercase">
+                <TitleText text={fact.label} />
+              </dt>
               <dd className="mt-1 text-lg leading-7 text-mono-900">{fact.value}</dd>
             </div>
           ))}
@@ -195,6 +247,21 @@ function ResearchSection({ section }: { section: Extract<CaseSection, { kind: "r
           </div>
         ))}
       </div>
+    </section>
+  )
+}
+
+function FigmaSection({ section }: { section: Extract<CaseSection, { kind: "figma" }> }) {
+  return (
+    <section className="space-y-8">
+       <SectionHeading id={section.id}>{section.label}</SectionHeading>
+      {section.isFullScreen ? (
+        <iframe className="w-full h-screen border border-mono-200" src={section.embedUrl} allowFullScreen></iframe>
+      ) : (
+        <div className="relative w-full pb-[56.25%]">
+          <iframe className="absolute top-0 left-0 w-full h-full border border-mono-200" src={section.embedUrl} allowFullScreen></iframe>
+        </div>
+      )}
     </section>
   )
 }
@@ -258,16 +325,22 @@ function CaseSectionView({ section, title }: { section: CaseSection; title: stri
       return <ResearchSection section={section} />
     case "groups":
       return <GroupsSection section={section} />
+    case "figma":
+      return <FigmaSection section={section} />
   }
 }
 
-export function CaseStudyPage({ study }: { study: CaseStudy }) {
+export function CaseStudyPage({ study: initialStudy }: { study: CaseStudy }) {
+  const [study, setStudy] = useState(initialStudy)
   const index = projects.findIndex((project) => project.href === study.href)
   const previousProject = index > 0 ? projects[index - 1] : null
   const nextProject = index >= 0 && index < projects.length - 1 ? projects[index + 1] : null
   const [activeId, setActiveId] = useState(study.sections[0]?.id ?? "")
   const articleRef = useRef<HTMLElement>(null)
   const scrollingTo = useRef<string | null>(null)
+  const transitioning = useRef(false)
+  const studyRef = useRef(study)
+  studyRef.current = study
 
   useEffect(() => {
     const root = articleRef.current
@@ -314,13 +387,56 @@ export function CaseStudyPage({ study }: { study: CaseStudy }) {
     requestAnimationFrame(step)
   }
 
+  async function transitionTo(next: CaseStudy, historyMode: "push" | "skip") {
+    if (transitioning.current || next.id === studyRef.current.id) return
+    transitioning.current = true
+    scrollingTo.current = null
+    try {
+      await curtains(
+        () => {
+          if (historyMode === "push") window.history.pushState({ caseId: next.id }, "", next.href)
+          flushSync(() => {
+            setStudy(next)
+            setActiveId(next.sections[0]?.id ?? "")
+          })
+          if (articleRef.current) articleRef.current.scrollTop = 0
+        },
+        { effect: blinds() },
+      )
+    } finally {
+      transitioning.current = false
+    }
+  }
+
+  function openProject(event: MouseEvent<HTMLAnchorElement>, href: string) {
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+    const next = caseStudyFromHref(href)
+    if (!next) return
+    event.preventDefault()
+    void transitionTo(next, "push")
+  }
+
+  useEffect(() => {
+    const onPopState = () => {
+      const path = window.location.pathname.replace(/\/$/, "") || "/"
+      const next = path === "/experience" ? findCaseStudy(new URLSearchParams(window.location.search).get("case")) : null
+      if (!next || transitioning.current) {
+        window.location.reload()
+        return
+      }
+      void transitionTo(next, "skip")
+    }
+    window.addEventListener("popstate", onPopState)
+    return () => window.removeEventListener("popstate", onPopState)
+  }, [])
+
   return (
     <div className="flex h-svh flex-col overflow-hidden bg-white font-neue text-mono-900">
       <SkipLink />
       <main id="main" className="flex min-h-0 w-full flex-1 flex-col p-12">
         <div className="flex shrink-0 items-center gap-8 lg:gap-16">
           <div className="shrink-0 lg:w-[calc(16rem+72px+24px)]">
-            <a href="/#projects" className="inline-flex items-center gap-2 text-base font-medium text-mono-950 md:text-lg">
+            <a href="/experience" className="inline-flex items-center gap-2 text-base font-medium text-mono-950 md:text-lg">
               <span aria-hidden className="inline-flex size-9 items-center justify-center rounded-full border border-mono-200">
                 <ChevronLeft className="size-4" />
               </span>
@@ -330,12 +446,13 @@ export function CaseStudyPage({ study }: { study: CaseStudy }) {
           <div className="flex min-w-0 flex-1 items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
               <p className="truncate text-base font-medium text-mono-950 md:text-xl">{study.title}</p>
-              <StepLink project={previousProject} label="Previous project" direction="previous" />
-              <StepLink project={nextProject} label="Next project" direction="next" />
+              <StepLink project={previousProject} label="Previous project" direction="previous" onNavigate={openProject} />
+              <StepLink project={nextProject} label="Next project" direction="next" onNavigate={openProject} />
             </div>
             <a
-              href="/#projects"
+              href="/"
               aria-label="Close project"
+              onClick={() => requestHomeScrollRestore()}
               className="inline-flex size-9 shrink-0 items-center justify-center rounded-full border border-mono-200 text-mono-950 hover:bg-mono-50"
             >
               <X className="size-5" />
@@ -370,7 +487,7 @@ export function CaseStudyPage({ study }: { study: CaseStudy }) {
             </ul>
           </nav>
 
-          <article ref={articleRef} className="min-h-0 min-w-0 flex-1 space-y-16 overflow-y-auto md:space-y-20">
+          <article key={study.id} ref={articleRef} className="min-h-0 min-w-0 flex-1 space-y-16 overflow-y-auto md:space-y-20">
             {study.sections.map((section) => (
               <CaseSectionView key={section.id} section={section} title={study.title} />
             ))}

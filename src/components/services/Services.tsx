@@ -1,21 +1,20 @@
 import { Section } from "@/components/layout/Section"
 import { SectionTitle } from "@/components/layout/SectionTitle"
-import { ServiceCard } from "@/components/services/ServiceCard"
-import { services } from "@/data/services"
+import { Cabinet } from "@/components/services/Cabinet"
+import { FluidReveal } from "@/components/services/FluidReveal"
+import { RewindClock } from "@/components/services/RewindClock"
 
 export function Services() {
   return (
-    <Section id="services">
-      <div className="mb-10 max-w-2xl">
+    <Section id="services" contained={false} className="overflow-visible bg-background">
+      <FluidReveal />
+      <div className="relative z-10 mx-auto w-full max-w-6xl px-5 md:px-8">
         <SectionTitle index="05">Services</SectionTitle>
-        <p className="mt-4 text-muted-foreground">
-          Ways we can work together — from a single flow to a full product experience.
-        </p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {services.map((service) => (
-          <ServiceCard key={service.title} {...service} />
-        ))}
+        <div className="relative mx-auto mt-36 w-full max-w-[776px] md:mt-48">
+          <RewindClock>
+            <Cabinet />
+          </RewindClock>
+        </div>
       </div>
     </Section>
   )
