@@ -4,12 +4,10 @@ import './index.css'
 import App from './App.tsx'
 import Hotjar from '@hotjar/browser';
 
-const siteId = Number(import.meta.env.VITE_HOTJAR_SITE_ID);
+const siteId = 6795357;
+const hotjarVersion = 6;
 
-if (siteId && typeof window !== 'undefined') {
-  Hotjar.init(siteId, 6);
-}
-
+Hotjar.init(siteId, hotjarVersion);
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
